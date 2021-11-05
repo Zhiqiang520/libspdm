@@ -2390,7 +2390,7 @@ int spdm_requester_get_certificate_test_main(void)
 		// Fail response: get a certificate chain not start with root cert but with wrong signature.
 		cmocka_unit_test(test_spdm_requester_get_certificate_case18),
 		// Fail response: one certificate in the retrieved certificate chain past its expiration date.
-		//cmocka_unit_test(test_spdm_requester_get_certificate_case19),
+		cmocka_unit_test(test_spdm_requester_get_certificate_case19),
 	};
 
 	setup_spdm_test_context(&m_spdm_requester_get_certificate_test_context);
