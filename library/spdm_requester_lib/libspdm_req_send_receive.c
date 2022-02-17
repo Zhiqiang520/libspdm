@@ -5,6 +5,7 @@
  **/
 
 #include "internal/libspdm_requester_lib.h"
+#include <stdio.h>
 
 /**
  * Send an SPDM or an APP request to a device.
@@ -236,6 +237,7 @@ return_status spdm_receive_spdm_response(IN spdm_context_t *spdm_context,
     spdm_session_info_t *session_info;
     libspdm_session_state_t session_state;
 
+    printf("!session_id in spdm_receive_spdm_response() is %x\n",*session_id);
     if ((session_id != NULL) &&
         spdm_is_capabilities_flag_supported(
             spdm_context, true,

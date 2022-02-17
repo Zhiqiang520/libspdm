@@ -5,6 +5,7 @@
  **/
 
 #include "internal/libspdm_requester_lib.h"
+#include <stdio.h>
 
 #if LIBSPDM_ENABLE_CAPABILITY_PSK_EX_CAP
 
@@ -50,12 +51,14 @@ return_status try_spdm_send_receive_psk_finish(IN spdm_context_t *spdm_context,
             SPDM_GET_CAPABILITIES_REQUEST_FLAGS_PSK_CAP,
             SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_PSK_CAP_RESPONDER_WITH_CONTEXT)) {
         status = RETURN_UNSUPPORTED;
+        printf("error here 1111111111111111111111111111\n");
         goto error;
     }
 
     if (spdm_context->connection_info.connection_state <
         LIBSPDM_CONNECTION_STATE_NEGOTIATED) {
         status = RETURN_UNSUPPORTED;
+        printf("error here 2222222222222222222222222222\n");
         goto error;
     }
 
@@ -64,12 +67,14 @@ return_status try_spdm_send_receive_psk_finish(IN spdm_context_t *spdm_context,
     if (session_info == NULL) {
         ASSERT(false);
         status = RETURN_UNSUPPORTED;
+        printf("error here 3333333333333333333333333333\n");
         goto error;
     }
     session_state = libspdm_secured_message_get_session_state(
         session_info->secured_message_context);
     if (session_state != LIBSPDM_SESSION_STATE_HANDSHAKING) {
         status = RETURN_UNSUPPORTED;
+        printf("error here 44444444444444444444444444444\n");
         goto error;
     }
 
@@ -88,6 +93,7 @@ return_status try_spdm_send_receive_psk_finish(IN spdm_context_t *spdm_context,
                                       spdm_request_size - hmac_size);
     if (RETURN_ERROR(status)) {
         status = RETURN_SECURITY_VIOLATION;
+        printf("error here 55555555555555555555555555555\n");
         goto error;
     }
 
@@ -95,6 +101,7 @@ return_status try_spdm_send_receive_psk_finish(IN spdm_context_t *spdm_context,
                                                  spdm_request.verify_data);
     if (!result) {
         status = RETURN_SECURITY_VIOLATION;
+        printf("error here 6666666666666666666666666666\n");
         goto error;
     }
 
@@ -104,12 +111,14 @@ return_status try_spdm_send_receive_psk_finish(IN spdm_context_t *spdm_context,
                                       hmac_size);
     if (RETURN_ERROR(status)) {
         status = RETURN_SECURITY_VIOLATION;
+        printf("error here 777777777777777777777777777777\n");
         goto error;
     }
 
     status = spdm_send_spdm_request(spdm_context, &session_id,
                                     spdm_request_size, &spdm_request);
     if (RETURN_ERROR(status)) {
+        printf("error here 8888888888888888888888888888888\n");
         goto error;
     }
 
@@ -121,19 +130,23 @@ return_status try_spdm_send_receive_psk_finish(IN spdm_context_t *spdm_context,
     status = spdm_receive_spdm_response(
         spdm_context, &session_id, &spdm_response_size, &spdm_response);
     if (RETURN_ERROR(status)) {
+        printf("error here 999999999999999999999999999999999\n");
         goto error;
     }
     if (spdm_response_size < sizeof(spdm_message_header_t)) {
         status = RETURN_DEVICE_ERROR;
+        printf("error here aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n");
         goto error;
     }
     if (spdm_response.header.spdm_version != spdm_request.header.spdm_version) {
         status = RETURN_DEVICE_ERROR;
+        printf("error here bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\n");
         goto error;
     }
     if (spdm_response.header.request_response_code == SPDM_ERROR) {
         if (spdm_response.header.param1 == SPDM_ERROR_CODE_DECRYPT_ERROR) {
             status = RETURN_SECURITY_VIOLATION;
+            printf("error here ccccccccccccccccccccccccccccccc\n");
             goto error;
         }
         status = spdm_handle_error_response_main(
@@ -142,15 +155,19 @@ return_status try_spdm_send_receive_psk_finish(IN spdm_context_t *spdm_context,
             SPDM_PSK_FINISH, SPDM_PSK_FINISH_RSP,
             sizeof(spdm_psk_finish_response_max_t));
         if (RETURN_ERROR(status)) {
+            printf("error here ddddddddddddddddddddddddddddddd\n");
             goto error;
         }
     } else if (spdm_response.header.request_response_code !=
                SPDM_PSK_FINISH_RSP) {
         status = RETURN_DEVICE_ERROR;
+        printf("error here eeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\n");
         goto error;
     }
     if (spdm_response_size != sizeof(spdm_psk_finish_response_t)) {
         status = RETURN_DEVICE_ERROR;
+        printf("!spdm_response_size is %d\n",spdm_response_size);
+        printf("!error here fffffffffffffffffffffffffffffffff\n");
         goto error;
     }
 
@@ -158,6 +175,7 @@ return_status try_spdm_send_receive_psk_finish(IN spdm_context_t *spdm_context,
                                       spdm_response_size);
     if (RETURN_ERROR(status)) {
         status = RETURN_SECURITY_VIOLATION;
+        printf("error here gggggggggggggggggggggggggggggggggg\n");
         goto error;
     }
 
@@ -166,12 +184,14 @@ return_status try_spdm_send_receive_psk_finish(IN spdm_context_t *spdm_context,
                                         th2_hash_data);
     if (RETURN_ERROR(status)) {
         status = RETURN_SECURITY_VIOLATION;
+        printf("error here hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh\n");
         goto error;
     }
     status = libspdm_generate_session_data_key(
         session_info->secured_message_context, th2_hash_data);
     if (RETURN_ERROR(status)) {
         status = RETURN_SECURITY_VIOLATION;
+        printf("error here iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii\n");
         goto error;
     }
 
@@ -183,6 +203,7 @@ return_status try_spdm_send_receive_psk_finish(IN spdm_context_t *spdm_context,
     return RETURN_SUCCESS;
 
 error:
+    printf("enter into error label!!!!!\n");
     if (RETURN_NO_RESPONSE != status) {
         libspdm_free_session_id(spdm_context, session_id);
     }

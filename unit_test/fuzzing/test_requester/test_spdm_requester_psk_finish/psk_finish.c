@@ -72,10 +72,11 @@ return_status spdm_device_receive_message(IN void *spdm_context, IN OUT uintn *r
     spdm_test_context = get_spdm_test_context();
     test_message_header_size = 1;
     session_id = 0xFFFFFFFF;
-    temp_buf_size = spdm_test_context->test_buffer_size;
+    temp_buf_size = spdm_test_context->test_buffer_size - 1;
+    printf("!temp_buf_size in spdm_device_receive_message() is %d\n",temp_buf_size);
     copy_mem_s((uint8_t *)temp_buf, sizeof(temp_buf),
                (uint8_t *)spdm_test_context->test_buffer + test_message_header_size,
-               spdm_test_context->test_buffer_size);
+               spdm_test_context->test_buffer_size - 1);
 
     spdm_transport_test_encode_message(spdm_context, &session_id, false, false, temp_buf_size,
                                        temp_buf, response_size, response);

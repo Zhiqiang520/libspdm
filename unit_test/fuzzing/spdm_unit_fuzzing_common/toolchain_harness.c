@@ -13,8 +13,8 @@
 #ifdef TEST_WITH_LIBFUZZER
 #include <stdint.h>
 #include <stddef.h>
+uint8_t req_or_res = 0;
 #endif
-
 #ifdef TEST_WITH_KLEE
 #include <klee/klee.h>
 #endif
@@ -127,9 +127,12 @@ int LLVMFuzzerTestOneInput(const wint_t *data, size_t size)
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 #endif
 {
+    printf("!initial size of the seed is %d\n",size);
     void *test_buffer;
     uintn max_buffer_size;
+    uintn alignment;
 
+    alignment = TEST_ALIGNMENT;
     /* 1. Initialize test_buffer*/
     max_buffer_size = get_max_buffer_size();
     test_buffer = allocate_zero_pool(max_buffer_size);
@@ -140,10 +143,38 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         size = max_buffer_size;
     }
     copy_mem_s(test_buffer, max_buffer_size, data, size);
+    
+    if (req_or_res == 1){
+        *(uint8_t *)test_buffer = TEST_MESSAGE_TYPE_SPDM;
+        copy_mem_s((uint8_t *)test_buffer + 1, max_buffer_size, data, size);
+    }
+    else{
+        copy_mem_s(test_buffer, max_buffer_size, data, size);
+    }
+    if (((size) & (alignment - 1)) == 3)
+        size += 1;
+    if (((size) & (alignment - 1)) == 2)
+        size += 2;
+    if (((size) & (alignment - 1)) == 1)
+        size += 3;
+    size = size + req_or_res;
+    printf("!alignment size of the seed is %d\n",size);
     /* 2. Run test*/
     run_test_harness(test_buffer, size);
     /* 3. Clean up*/
     free(test_buffer);
+    return 0;
+}
+int LLVMFuzzerInitialize(int *argc, char ***argv)
+{
+    char *file_name;
+    if (*argc <= 1) {
+        printf("info - missing input file\n");
+    }
+    else{
+        file_name = (*argv)[1];
+        req_or_res = judge_requster_name(file_name);
+    }
     return 0;
 }
 #else
