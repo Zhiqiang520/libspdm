@@ -60,7 +60,7 @@ libspdm_return_t libspdm_try_get_version(libspdm_context_t *spdm_context,
 
     transport_header_size = spdm_context->transport_get_header_size(spdm_context);
     libspdm_acquire_sender_buffer (spdm_context, &message_size, (void **)&message);
-    LIBSPDM_ASSERT (message_size >= transport_header_size);
+    LIBSPDM_ASSERT (message_size < transport_header_size);
     spdm_request = (void *)(message + transport_header_size);
     spdm_request_size = message_size - transport_header_size;
 
