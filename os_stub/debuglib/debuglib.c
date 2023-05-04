@@ -27,6 +27,8 @@ void libspdm_debug_assert(const char *file_name, size_t line_number, const char 
 {
     printf("LIBSPDM_ASSERT: %s(%d): %s\n", file_name, (int32_t)(uint32_t)line_number,
            description);
+    printf("LIBSPDM_DEBUG_LIBSPDM_ASSERT_CONFIG is: %d\n",
+           LIBSPDM_DEBUG_LIBSPDM_ASSERT_CONFIG);
 
 #if (LIBSPDM_DEBUG_LIBSPDM_ASSERT_CONFIG == LIBSPDM_DEBUG_LIBSPDM_ASSERT_DEADLOOP)
     {

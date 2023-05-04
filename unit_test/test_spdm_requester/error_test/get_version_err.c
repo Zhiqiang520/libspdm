@@ -524,6 +524,7 @@ static void libspdm_test_requester_get_version_err_case1(void **state)
 
     status = libspdm_get_version(spdm_context, NULL, NULL);
     assert_int_equal(status, LIBSPDM_STATUS_SEND_FAIL);
+    LIBSPDM_ASSERT (false);
 }
 
 /**
