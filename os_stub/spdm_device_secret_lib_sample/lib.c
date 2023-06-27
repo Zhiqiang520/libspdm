@@ -9,13 +9,6 @@
  * It follows the SPDM Specification.
  **/
 #include <base.h>
-#if defined(_MSC_VER) || (defined(__clang__) && (defined (LIBSPDM_CPU_AARCH64) || \
-    defined(LIBSPDM_CPU_ARM)))
-#else
-    #include <fcntl.h>
-    #include <unistd.h>
-    #include <sys/stat.h>
-#endif
 #include <stdarg.h>
 #include <stddef.h>
 #include <setjmp.h>
@@ -1620,19 +1613,12 @@ bool libspdm_write_certificate_to_nvm(uint8_t slot_id, const void * cert_chain,
                                       size_t cert_chain_size,
                                       uint32_t base_hash_algo, uint32_t base_asym_algo)
 {
-#if defined(_MSC_VER) || (defined(__clang__) && (defined (LIBSPDM_CPU_AARCH64) || \
-    defined(LIBSPDM_CPU_ARM)))
     FILE *fp_out;
-#else
-    int64_t fp_out;
-#endif
 
     char file_name[] = {'s','l','o','t','_','i','d','_','0','\0'};
 
     file_name[strlen(file_name) - 1] = (char)(slot_id+'0');
 
-#if defined(_MSC_VER) || (defined(__clang__) && (defined (LIBSPDM_CPU_AARCH64) || \
-    defined(LIBSPDM_CPU_ARM)))
     if ((fp_out = fopen(file_name, "w+b")) == NULL) {
         printf("Unable to open file %s\n", file_name);
         return false;
@@ -1645,21 +1631,6 @@ bool libspdm_write_certificate_to_nvm(uint8_t slot_id, const void * cert_chain,
     }
 
     fclose(fp_out);
-#else
-    if ((fp_out = open(file_name, O_WRONLY | O_CREAT, S_IRWXU)) == -1) {
-        printf("Unable to open file %s\n", file_name);
-        return false;
-    }
-
-    if ((write(fp_out, cert_chain, cert_chain_size)) != cert_chain_size)
-    {
-        printf("Write output file error %s\n", file_name);
-        close(fp_out);
-        return false;
-    }
-
-    close(fp_out);
-#endif
 
     return true;
 }
