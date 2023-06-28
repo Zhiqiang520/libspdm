@@ -293,6 +293,9 @@ libspdm_return_t libspdm_requester_chunk_get_test_send_message(
     else if (spdm_test_context->case_id == 0x5) {
         return LIBSPDM_STATUS_SUCCESS;
     }
+    else if (spdm_test_context->case_id == 0x6) {
+        return LIBSPDM_STATUS_SUCCESS;
+    }
     else {
         return LIBSPDM_STATUS_SEND_FAIL;
     }
@@ -447,6 +450,33 @@ libspdm_return_t libspdm_requester_chunk_get_test_receive_message(
     else if (spdm_test_context->case_id == 0x5) {
         build_response_func =
             libspdm_requester_chunk_get_test_case5_build_algorithms_response;
+    }
+    else if (spdm_test_context->case_id == 0x6) {
+        /* The response to a CHUNK_GET request itself, shall not be ErrorCode ==ResponseNotReady. */
+        spdm_error_response_data_response_not_ready_t* error_not_ready;
+        size_t error_not_ready_size;
+
+        transport_header_size = LIBSPDM_TEST_TRANSPORT_HEADER_SIZE;
+        error_not_ready = (void*) ((uint8_t*) *response + transport_header_size);
+        error_not_ready_size = sizeof(spdm_error_response_data_response_not_ready_t);
+
+        error_not_ready->header.spdm_version = SPDM_MESSAGE_VERSION_12;
+        error_not_ready->header.request_response_code = SPDM_ERROR;
+
+        /* The response to a CHUNK_GET request itself, is ErrorCode ==ResponseNotReady */
+        error_not_ready->header.param1 = SPDM_ERROR_CODE_RESPONSE_NOT_READY;
+        error_not_ready->header.param2 = 0;
+        error_not_ready->extend_error_data.rd_exponent = 1;
+        error_not_ready->extend_error_data.rd_tm = 2;
+        error_not_ready->extend_error_data.request_code = SPDM_NEGOTIATE_ALGORITHMS;
+        error_not_ready->extend_error_data.token = 0;
+
+        libspdm_transport_test_encode_message(
+            spdm_context, NULL, false, false,
+            error_not_ready_size, error_not_ready,
+            response_size, response);
+
+        return LIBSPDM_STATUS_SUCCESS;
     }
     else {
         LIBSPDM_ASSERT(0);
@@ -886,6 +916,43 @@ void libspdm_test_requester_chunk_get_case5(void** state)
     #endif
 }
 
+void libspdm_test_requester_chunk_get_case6(void** state)
+{
+    /* Copied from Neg. Algorithms test case 2 */
+    libspdm_return_t status;
+    libspdm_test_context_t* spdm_test_context;
+    libspdm_context_t* spdm_context;
+
+    spdm_test_context = *state;
+    spdm_context = spdm_test_context->spdm_context;
+    spdm_test_context->case_id = 0x6;
+    spdm_context->connection_info.version = SPDM_MESSAGE_VERSION_12 <<
+                                            SPDM_VERSION_NUMBER_SHIFT_BIT;
+    spdm_context->connection_info.connection_state =
+        LIBSPDM_CONNECTION_STATE_AFTER_CAPABILITIES;
+    spdm_context->connection_info.capability.flags |=
+        (SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CERT_CAP
+         | SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CHUNK_CAP);
+
+    spdm_context->local_context.capability.flags |=
+        SPDM_GET_CAPABILITIES_REQUEST_FLAGS_CHUNK_CAP;
+    spdm_context->local_context.capability.data_transfer_size
+        = CHUNK_GET_REQUESTER_UNIT_TEST_DATA_TRANSFER_SIZE;
+
+    spdm_context->local_context.algorithm.measurement_hash_algo =
+        m_libspdm_use_measurement_hash_algo;
+    spdm_context->local_context.algorithm.base_asym_algo = m_libspdm_use_asym_algo;
+    spdm_context->local_context.algorithm.base_hash_algo = m_libspdm_use_hash_algo;
+    libspdm_reset_message_a(spdm_context);
+
+    status = libspdm_negotiate_algorithms(spdm_context);
+    assert_int_equal(status, LIBSPDM_STATUS_ERROR_PEER);
+    #if LIBSPDM_RECORD_TRANSCRIPT_DATA_SUPPORT
+    assert_int_equal(
+        spdm_context->transcript.message_a.buffer_size, 0);
+    #endif
+}
+
 libspdm_test_context_t m_libspdm_requester_chunk_get_test_context = {
     LIBSPDM_TEST_CONTEXT_VERSION,
     true,
@@ -916,6 +983,8 @@ int libspdm_requester_chunk_get_test_main(void)
 
         /* Request Algorithms */
         cmocka_unit_test(libspdm_test_requester_chunk_get_case5),
+        /* The response to a CHUNK_GET request itself, shall not be ErrorCode ==ResponseNotReady. */
+        cmocka_unit_test(libspdm_test_requester_chunk_get_case6),
     };
 
     libspdm_setup_test_context(
