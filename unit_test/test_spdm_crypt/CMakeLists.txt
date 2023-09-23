@@ -33,6 +33,7 @@ SET(test_spdm_crypt_LIBRARY
     cmockalib
     spdm_device_secret_lib_sample
     spdm_crypt_ext_lib
+    spdm_common_lib
 )
 
 if(TOOLCHAIN STREQUAL "ARM_DS2022")

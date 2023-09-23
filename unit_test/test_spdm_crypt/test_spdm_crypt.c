@@ -644,7 +644,9 @@ void libspdm_test_crypt_req_asym_verify(void **state)
         free(private_pem);
         assert_true(status);
     }
-
+    printf("point context for private_key is %p\n",context);
+    LIBSPDM_INTERNAL_DUMP_HEX(context, 1024);
+    printf("\n");
     sig_size = libspdm_get_asym_signature_size(libspdm_use_req_asym_algo);
 
 #if LIBSPDM_RECORD_TRANSCRIPT_DATA_SUPPORT
@@ -678,6 +680,9 @@ void libspdm_test_crypt_req_asym_verify(void **state)
         der_size,
         &context);
     assert_true(status);
+    printf("point context for public_key is %p\n",context);
+    LIBSPDM_INTERNAL_DUMP_HEX(context, 1024);
+    printf("\n");
 
 #if LIBSPDM_RECORD_TRANSCRIPT_DATA_SUPPORT
     /* Big Endian Signature. Big Endian Verify */
